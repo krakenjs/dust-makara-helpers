@@ -1,0 +1,20 @@
+{
+  "name": "dust-makara-helpers",
+  "version": "1.0.0",
+  "description": "Internationalization helpers for dust",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "i18n",
+    "dust"
+  ],
+  "author": "Aria Stewart <ariastewart@paypal.com>",
+  "license": "Apache 2.0",
+  "dependencies": {
+    "dust-message-helper": "^3.0.0",
+    "dust-usecontent-helper": "^2.1.0",
+    "spundle": "^1.0.2"
+  }
+}
