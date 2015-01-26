@@ -12,6 +12,7 @@
   ],
   "author": "Aria Stewart <ariastewart@paypal.com>",
   "license": "Apache 2.0",
+  "repository": "https://github.com/krakenjs/dust-makara-helpers.git",
   "dependencies": {
     "dust-message-helper": "^3.0.0",
     "dust-usecontent-helper": "^2.1.0",
