@@ -8,5 +8,5 @@ Use
 
 ```
 var dust = require('dustjs-linkedin');
-require('dust-makara-helpers').registerWith(dust);
+require('dust-makara-helpers').registerWith(dust, {localeRoot: __dirname});
 ```
