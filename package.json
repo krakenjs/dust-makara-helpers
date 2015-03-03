@@ -4,7 +4,7 @@
   "description": "Internationalization helpers for dust",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "tape test/*.js"
   },
   "keywords": [
     "i18n",
@@ -19,5 +19,9 @@
     "dustjacket": "^2.1.0",
     "iferr": "^0.1.5",
     "spundle": "^1.0.3"
+  },
+  "devDependencies": {
+    "dustjs-linkedin": "^2.5.1",
+    "tape": "^3.5.0"
   }
 }
