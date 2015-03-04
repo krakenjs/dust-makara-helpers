@@ -15,7 +15,7 @@
   "repository": "https://github.com/krakenjs/dust-makara-helpers.git",
   "dependencies": {
     "dust-message-helper": "^3.0.0",
-    "dust-usecontent-helper": "^2.1.0",
+    "dust-usecontent-helper": "^3.0.0",
     "dustjacket": "^2.1.0",
     "iferr": "^0.1.5",
     "spundle": "^1.0.3"

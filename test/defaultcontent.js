@@ -12,7 +12,7 @@ test('apply default content', function (t) {
         cb(null, '{@message key="hello"/} {@useContent bundle="world.properties"}{@message key="world" /}{/useContent}');
     });
 
-    dust.render('test', {context: {locality: { country: 'US', language: 'en' } } }, function (err, out) {
+    dust.render('test', {locale: { country: 'US', language: 'en' } }, function (err, out) {
         t.error(err);
         t.equal(out, 'Hello, World');
         t.end();

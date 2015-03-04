@@ -26,8 +26,8 @@ module.exports = function(dust, options) {
 
     function defaultContent(name, context, cb) {
         /* Handle paypal-style or bcp47-style objects */
-        var country = context.get('context.locale.country') || context.get('context.locale.langtag.region');
-        var language = context.get('context.locale.language') || context.get('context.locale.langtag.language.language');
+        var country = context.get('locale.country') || context.get('locale.langtag.region');
+        var language = context.get('locale.language') || context.get('locale.langtag.language.language');
 
         lookupContent(country, language, iferr(cb, function (messages) {
             cb(null, {context: { "intl": {"messages": messages[context.templateName + '.properties'] } }});
