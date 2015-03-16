@@ -10,8 +10,6 @@ module.exports = function(dust, options) {
 
     dustjacket.registerWith(dust);
 
-    dust.addLoadMiddleware(defaultContent);
-
     usecontent(function(locale, bundle, cb) {
         /* Handle paypal-style or bcp47-style objects */
         var country = locale.country || locale.langtag.region;
@@ -23,16 +21,7 @@ module.exports = function(dust, options) {
 
     message.registerWith(dust);
 
-
-    function defaultContent(name, context, cb) {
-        /* Handle paypal-style or bcp47-style objects */
-        var country = context.get('locale.country') || context.get('locale.langtag.region');
-        var language = context.get('locale.language') || context.get('locale.langtag.language.language');
-
-        lookupContent(country, language, iferr(cb, function (messages) {
-            cb(null, {context: { "intl": {"messages": messages[context.templateName + '.properties'] } }});
-        }));
-    }
+    replaceRegister(dust);
 
     function lookupContent(country, language, cb) {
         if (!country ) return cb(new Error("no country present"));
@@ -41,6 +30,33 @@ module.exports = function(dust, options) {
         spundle(options.localeRoot, country, language, iferr(cb, function (messages) {
             cb(null, messages[[language, country].join('-')]);
         }));
+    }
+
+    function replaceRegister(dust) {
+        var oldregister = dust.register;
+        dust.register = function(name, tmpl) {
+            oldregister.call(this, name, function (chunk, context) {
+
+                return chunk.map(function (chunk) {
+                    /* Handle paypal-style or bcp47-style objects */
+                    var country = context.get('locale.country') || context.get('locale.langtag.region');
+                    var language = context.get('locale.language') || context.get('locale.langtag.language.language');
+                    lookupContent(country, language, function (err, messages) {
+                        if (err) {
+                            chunk.setError(err);
+                        } else {
+                            var m = Object.create(context.get('intl.messages') || {});
+                            for (var k in messages[context.templateName + '.properties']) {
+                                m[k] = messages[context.templateName + '.properties'][k];
+                            }
+
+                            var ctx = context.push({ intl: { messages: m } });
+                            chunk.render(tmpl, ctx).end();
+                        }
+                    });
+                });
+            });
+        };
     }
 };
 
