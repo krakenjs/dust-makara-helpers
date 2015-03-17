@@ -14,8 +14,6 @@ test('apply default content', function (t) {
         cb(null, '{@message key="hello"/} {@useContent bundle="world.properties"}{@message key="world" /}{/useContent}');
     });
 
-
-
     dust.render('test', {locale: { country: 'US', language: 'en' } }, function (err, out) {
         t.error(err);
         t.equal(out, 'Hello, World');
@@ -36,11 +34,25 @@ test('apply default content when layout present', function (t) {
         }
     });
 
-
-
     dust.render('test', {locale: { country: 'US', language: 'en' } }, function (err, out) {
         t.error(err);
         t.equal(out, 'Hello, World');
+        t.end();
+    });
+});
+
+test('Make sure unrequested content is unavailable', function (t) {
+    var dust = freshy('dustjs-linkedin');
+
+    makarahelpers.registerWith(dust, {localeRoot: path.resolve(__dirname, 'fixtures')});
+
+    dust.addLoadMiddleware(function (name, context, cb) {
+        cb(null, '{@message key="hello"/} {@message key="world" /}');
+    });
+
+    dust.render('test', {locale: { country: 'US', language: 'en' } }, function (err, out) {
+        t.error(err);
+        t.equal(out, 'Hello, ☃world☃');
         t.end();
     });
 });
