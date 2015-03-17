@@ -46,8 +46,9 @@ module.exports = function(dust, options) {
                             chunk.setError(err);
                         } else {
                             var m = Object.create(context.get('intl.messages') || {});
-                            for (var k in messages[context.templateName + '.properties']) {
-                                m[k] = messages[context.templateName + '.properties'][k];
+                            var propfile = name + '.properties';
+                            for (var k in messages[propfile]) {
+                                m[k] = messages[propfile][k];
                             }
 
                             var ctx = context.push({ intl: { messages: m } });
