@@ -8,6 +8,8 @@ var iferr = require('iferr');
 module.exports = function(dust, options) {
     options = options || {};
 
+    var autoloadTemplateContent = (options.autoloadTemplateContent == null ? true : options.autoloadTemplateContent);
+
     dustjacket.registerWith(dust);
 
     usecontent(function(locale, bundle, cb) {
@@ -21,7 +23,9 @@ module.exports = function(dust, options) {
 
     message.registerWith(dust);
 
-    replaceRegister(dust);
+    if (autoloadTemplateContent) {
+        replaceRegister(dust);
+    }
 
     function lookupContent(country, language, cb) {
         if (!country ) return cb(new Error("no country present"));

@@ -56,3 +56,22 @@ test('Make sure unrequested content is unavailable', function (t) {
         t.end();
     });
 });
+
+test('Make sure autoloading content behavior can be disabled', function (t) {
+    var dust = freshy('dustjs-linkedin');
+
+    makarahelpers.registerWith(dust, {
+        localeRoot: path.resolve(__dirname, 'fixtures'),
+        autoloadTemplateContent: false
+    });
+
+    dust.addLoadMiddleware(function (name, context, cb) {
+        cb(null, '{@message key="hello"/}');
+    });
+
+    dust.render('test', {locale: { country: 'US', language: 'en' } }, function (err, out) {
+        t.error(err);
+        t.equal(out, '☃hello☃');
+        t.end();
+    });
+});
