@@ -14,7 +14,7 @@
   "license": "Apache 2.0",
   "repository": "https://github.com/krakenjs/dust-makara-helpers.git",
   "dependencies": {
-    "dust-message-helper": "^3.0.0",
+    "dust-message-helper": "^4.0.0",
     "dust-usecontent-helper": "^3.0.0",
     "dustjacket": "^2.1.2",
     "iferr": "^0.1.5",
