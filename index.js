@@ -4,6 +4,7 @@ var message = require('dust-message-helper');
 var spundle = require('spundle');
 var dustjacket = require('dustjacket');
 var iferr = require('iferr');
+var memoize = require('simple-memoize');
 
 module.exports = function(dust, options) {
     options = options || {};
@@ -27,11 +28,13 @@ module.exports = function(dust, options) {
         replaceRegister(dust);
     }
 
+    var getBundle = options.memoize || options.memoize == null ? memoize(spundle) : spundle;
+
     function lookupContent(country, language, cb) {
         if (!country ) return cb(new Error("no country present"));
         if (!language) return cb(new Error("no language present"));
 
-        spundle(options.localeRoot, country, language, iferr(cb, function (messages) {
+        getBundle(options.localeRoot, country, language, iferr(cb, function (messages) {
             cb(null, messages[[language, country].join('-')]);
         }));
     }

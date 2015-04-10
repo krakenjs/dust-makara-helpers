@@ -8,5 +8,15 @@ Use
 
 ```
 var dust = require('dustjs-linkedin');
-require('dust-makara-helpers').registerWith(dust, {localeRoot: __dirname});
+require('dust-makara-helpers').registerWith(dust, {
+    localeRoot: __dirname,
+    memoize: false
+});
 ```
+
+Options
+-------
+
+`localeRoot`: the directory to look in for properties bundles.
+
+`memoize`: defaults to `true`. Prevent looking up content strings on every run.

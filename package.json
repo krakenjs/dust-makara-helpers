@@ -18,6 +18,7 @@
     "dust-usecontent-helper": "^3.0.0",
     "dustjacket": "^2.1.2",
     "iferr": "^0.1.5",
+    "simple-memoize": "^1.0.2",
     "spundle": "^1.0.3"
   },
   "devDependencies": {
