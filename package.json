@@ -1,6 +1,6 @@
 {
   "name": "dust-makara-helpers",
-  "version": "3.0.0",
+  "version": "3.0.1",
   "description": "Internationalization helpers for dust",
   "main": "index.js",
   "scripts": {
