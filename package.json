@@ -22,7 +22,7 @@
     "spundle": "^1.0.3"
   },
   "devDependencies": {
-    "dustjs-linkedin": "^2.5.1",
+    "dustjs-linkedin": "~2.5.1",
     "freshy": "^1.0.0",
     "tape": "^3.5.0"
   }
