@@ -1,71 +1,133 @@
 "use strict";
 var usecontent = require('dust-usecontent-helper');
 var message = require('dust-message-helper');
-var spundle = require('spundle');
-var dustjacket = require('dustjacket');
+var spud = require('spud');
 var iferr = require('iferr');
 var memoize = require('simple-memoize');
+var VError = require('verror');
+var debug = require('debuglog')('dust-makara-helpers');
+var fs = require('fs');
+var aproba = require('aproba');
 
 module.exports = function(dust, options) {
     options = options || {};
 
+    debug("registering");
+
     var autoloadTemplateContent = (options.autoloadTemplateContent == null ? true : options.autoloadTemplateContent);
 
-    dustjacket.registerWith(dust);
+    debug("will autoload template content? %j", autoloadTemplateContent);
 
-    usecontent(function(locale, bundle, cb) {
-        /* Handle paypal-style or bcp47-style objects */
-        var country = locale.country || locale.langtag.region;
-        var language = locale.language || locale.langtag.language.language;
-        lookupContent(country, language, iferr(cb, function (messages) {
-            cb(null, messages[bundle]);
-        }));
+    usecontent(function(ctx, bundle, cb) {
+        aproba('OSF', arguments);
+        if (!ctx.options || !ctx.options.view) {
+            return cb(makeErr(ctx, bundle));
+        }
+
+        var locale = localeFromContext(ctx);
+
+        debug("looking up '%s' for template '%s' and locale %j", bundle, ctx.templateName, locale);
+        ctx.options.view.lookup(bundle, locale, iferr(cb, function (file) {
+            fs.readFile(file, 'utf-8', iferr(cb, function (data) {
+                try {
+                    cb(null, spud.parse(data));
+                } catch (e) {
+                    cb(e);
+                }
+            }));
+        }))
+
     }).registerWith(dust);
 
     message.registerWith(dust);
 
     if (autoloadTemplateContent) {
-        replaceRegister(dust);
+        wrapOnLoad(dust);
     }
 
-    var getBundle = options.memoize || options.memoize == null ? memoize(spundle) : spundle;
-
-    function lookupContent(country, language, cb) {
-        if (!country ) return cb(new Error("no country present"));
-        if (!language) return cb(new Error("no language present"));
-
-        getBundle(options.localeRoot, country, language, iferr(cb, function (messages) {
-            cb(null, messages[[language, country].join('-')]);
-        }));
+    function localeFromContext(ctx) {
+        return ctx.get('contextLocale') || ctx.get('contentLocality') ||
+            ctx.get('locale') || ctx.get('locality') || {};
     }
 
-    function replaceRegister(dust) {
-        var oldregister = dust.register;
-        dust.register = function(name, tmpl) {
-            oldregister.call(this, name, function (chunk, context) {
+    // This is where the magic lies. To get a hook on templates and wrap them with
+    // javascript that is aware of the template's name
+    function wrapOnLoad(dust) {
+        var oldOnLoad = dust.onLoad;
 
-                return chunk.map(function (chunk) {
-                    /* Handle paypal-style or bcp47-style objects */
-                    var country = context.get('locale.country') || context.get('locale.langtag.region');
-                    var language = context.get('locale.language') || context.get('locale.langtag.language.language');
-                    lookupContent(country, language, function (err, messages) {
-                        if (err) {
-                            chunk.setError(err);
-                        } else {
-                            var m = Object.create(context.get('intl.messages') || {});
-                            var propfile = name + '.properties';
-                            for (var k in messages[propfile]) {
-                                m[k] = messages[propfile][k];
-                            }
+        if (!oldOnLoad) {
+            throw new Error("dust.onLoad must be configured to use automatic content loading");
+        }
 
-                            var ctx = context.push({ intl: { messages: m } });
-                            chunk.render(tmpl, ctx).end();
+        debug("wrapping onLoad function to support content autoloading");
+
+        dust.onLoad = function(name, options, cb) {
+
+            var ourLoader = iferr(cb, function (srcOrTemplate) {
+                debug("got template %s", srcOrTemplate);
+
+                var tmpl = getTemplate(srcOrTemplate);
+                if (!tmpl) {
+                    tmpl = dust.loadSource(dust.compile(srcOrTemplate, name));
+                }
+
+                debug("wrapping template '%s' to look up default content", name);
+                var newTmpl = function (chunk, ctx) {
+                    return chunk.map(function (chunk) {
+                        var locale = localeFromContext(ctx);
+                        var bundle = name + '.properties';
+
+                        if (!ctx.options || !ctx.options.view) {
+                            return chunk.setError(makeErr(ctx, bundle));
                         }
+
+                        debug("looking up '%s' for template '%s', and locale %j", bundle, name, locale);
+                        dust.helpers.useContent(chunk, ctx, { block: tmpl }, { bundle: bundle }).end();
                     });
-                });
+                };
+                newTmpl.templateName = name;
+                newTmpl.__dustBody = true;
+
+                cb(null, newTmpl);
             });
+
+            console.warn(oldOnLoad.toString());
+            debug("calling old onLoad to get template");
+            if (oldOnLoad.length == 2) {
+                return oldOnLoad.call(this, name, ourLoader);
+            } else {
+                return oldOnLoad.call(this, name, options, ourLoader);
+            }
         };
     }
+
+    /**
+     * Extracts a template function (body_0) from whatever is passed.
+     * @param nameOrTemplate {*} Could be:
+     *   - the name of a template to load from cache
+     *   - a CommonJS-compiled template (a function with a `template` property)
+     *   - a template function
+     * @return {Function} a template function, if found
+     */
+    function getTemplate(nameOrTemplate) {
+        if(!nameOrTemplate) {
+            return;
+        }
+        if(typeof nameOrTemplate === 'function' && nameOrTemplate.template) {
+            // Sugar away CommonJS module templates
+            return nameOrTemplate.template;
+        }
+        if(dust.isTemplateFn(nameOrTemplate)) {
+            // Template functions passed directly
+            return nameOrTemplate;
+        }
+    }
 };
+
+function makeErr(ctx, bundle) {
+    var str = "no view available rendering template named '%s' and content bundle '%s'";
+    debug(str, ctx.templateName, bundle);
+    return new VError(str, ctx.templateName, bundle);
+}
 
 module.exports.registerWith = module.exports;

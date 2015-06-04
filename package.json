@@ -4,7 +4,7 @@
   "description": "Internationalization helpers for dust",
   "main": "index.js",
   "scripts": {
-    "test": "tape test/*.js"
+    "test": "tap test/*.js"
   },
   "keywords": [
     "i18n",
@@ -14,16 +14,19 @@
   "license": "Apache-2.0",
   "repository": "https://github.com/krakenjs/dust-makara-helpers.git",
   "dependencies": {
-    "dust-message-helper": "^4.0.1",
-    "dust-usecontent-helper": "^3.0.0",
-    "dustjacket": "^2.1.2",
+    "aproba": "^1.0.1",
+    "debuglog": "^1.0.1",
+    "dust-message-helper": "^4.0.2",
+    "dust-usecontent-helper": "^4.0.0-0",
     "iferr": "^0.1.5",
     "simple-memoize": "^1.0.2",
-    "spundle": "^1.0.3"
+    "spud": "^2.0.1",
+    "verror": "^1.6.0"
   },
   "devDependencies": {
-    "dustjs-linkedin": "~2.5.1",
+    "dustjs-linkedin": "~2.7.1",
+    "engine-munger": "^1.0.0-3",
     "freshy": "^1.0.0",
-    "tape": "^3.5.0"
+    "tap": "^1.2.0"
   }
 }
