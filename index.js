@@ -68,30 +68,31 @@ module.exports = function(dust, options) {
 
                 var tmpl = getTemplate(srcOrTemplate);
                 if (!tmpl) {
+                    debug("Compiling template '%s'", name);
                     tmpl = dust.loadSource(dust.compile(srcOrTemplate, name));
                 }
 
-                debug("wrapping template '%s' to look up default content", name);
+                debug("wrapping template '%s' to look up default content", tmpl.templateName);
                 var newTmpl = function (chunk, ctx) {
                     return chunk.map(function (chunk) {
                         var locale = localeFromContext(ctx);
-                        var bundle = name + '.properties';
+                        var bundle = tmpl.templateName + '.properties';
 
                         if (!ctx.options || !ctx.options.view) {
                             return chunk.setError(makeErr(ctx, bundle));
                         }
 
-                        debug("looking up '%s' for template '%s', and locale %j", bundle, name, locale);
+                        debug("looking up '%s' for template '%s', and locale %j", bundle, tmpl.templateName, locale);
                         dust.helpers.useContent(chunk, ctx, { block: tmpl }, { bundle: bundle }).end();
                     });
                 };
-                newTmpl.templateName = name;
+                newTmpl.templateName = tmpl.templateName;
                 newTmpl.__dustBody = true;
 
                 cb(null, newTmpl);
             });
 
-            debug("calling old onLoad to get template");
+            debug("calling old onLoad to get template '%s'", name);
             if (oldOnLoad.length == 2) {
                 return oldOnLoad.call(this, name, ourLoader);
             } else {
