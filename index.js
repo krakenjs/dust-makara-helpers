@@ -91,7 +91,6 @@ module.exports = function(dust, options) {
                 cb(null, newTmpl);
             });
 
-            console.warn(oldOnLoad.toString());
             debug("calling old onLoad to get template");
             if (oldOnLoad.length == 2) {
                 return oldOnLoad.call(this, name, ourLoader);
