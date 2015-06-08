@@ -20,7 +20,6 @@
     "dust-message-helper": "^4.0.2",
     "dust-usecontent-helper": "^4.0.0-1",
     "iferr": "^0.1.5",
-    "simple-memoize": "^1.0.2",
     "spud": "^2.0.1",
     "verror": "^1.6.0"
   },

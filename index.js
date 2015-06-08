@@ -3,7 +3,6 @@ var usecontent = require('dust-usecontent-helper');
 var message = require('dust-message-helper');
 var spud = require('spud');
 var iferr = require('iferr');
-var memoize = require('simple-memoize');
 var VError = require('verror');
 var debug = require('debuglog')('dust-makara-helpers');
 var fs = require('fs');
