@@ -4,7 +4,8 @@
   "description": "Internationalization helpers for dust",
   "main": "index.js",
   "scripts": {
-    "test": "tap test/*.js"
+    "test": "nyc tap test/*.js && nyc report",
+    "coverage": "nyc report --reporter=lcov"
   },
   "keywords": [
     "i18n",
@@ -27,6 +28,7 @@
     "dustjs-linkedin": "~2.7.1",
     "engine-munger": "^1.0.0-3",
     "freshy": "^1.0.0",
+    "nyc": "^2.3.0",
     "tap": "^1.2.0"
   }
 }
