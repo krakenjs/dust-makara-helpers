@@ -39,7 +39,7 @@ module.exports = function(dust, options) {
 
     }).registerWith(dust);
 
-    message.registerWith(dust);
+    message.registerWith(dust, { enableMetadata: options.enableMetadata });
 
     if (autoloadTemplateContent) {
         wrapOnLoad(dust);
