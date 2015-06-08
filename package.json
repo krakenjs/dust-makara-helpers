@@ -15,6 +15,7 @@
   "repository": "https://github.com/krakenjs/dust-makara-helpers.git",
   "dependencies": {
     "aproba": "^1.0.1",
+    "bcp47-stringify": "^1.0.0",
     "debuglog": "^1.0.1",
     "dust-message-helper": "^4.0.2",
     "dust-usecontent-helper": "^4.0.0-1",

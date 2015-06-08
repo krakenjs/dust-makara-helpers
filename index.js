@@ -8,6 +8,7 @@ var VError = require('verror');
 var debug = require('debuglog')('dust-makara-helpers');
 var fs = require('fs');
 var aproba = require('aproba');
+var bcp47s = require('bcp47-stringify');
 
 module.exports = function(dust, options) {
     options = options || {};
@@ -26,11 +27,24 @@ module.exports = function(dust, options) {
 
         var locale = localeFromContext(ctx);
 
+        var localeString = stringLocale(locale);
+        var cacheKey = bundle + '#' + localeString;
+        if (dust.config.cache && dust.cache[cacheKey]) {
+            debug("found in cache at '%s'", cacheKey);
+            return cb(null, dust.cache[cacheKey]);
+        }
+
         debug("looking up '%s' for template '%s' and locale %j", bundle, ctx.templateName, locale);
         ctx.options.view.lookup(bundle, locale, iferr(cb, function (file) {
             fs.readFile(file, 'utf-8', iferr(cb, function (data) {
                 try {
-                    cb(null, spud.parse(data));
+                    var parsed = spud.parse(data);
+                    if (dust.config.cache) {
+                        debug("setting cache key '%s' to %j", cacheKey, parsed);
+                        dust.cache[cacheKey] = parsed;
+                    }
+
+                    cb(null, parsed);
                 } catch (e) {
                     cb(e);
                 }
@@ -128,6 +142,16 @@ function makeErr(ctx, bundle) {
     var str = "no view available rendering template named '%s' and content bundle '%s'";
     debug(str, ctx.templateName, bundle);
     return new VError(str, ctx.templateName, bundle);
+}
+
+function stringLocale(locale) {
+    if (!locale) {
+        return undefined;
+    } else if (locale.country && locale.language) {
+        return locale.language + '-' + locale.country;
+    } else {
+        return bcp47s(locale);
+    }
 }
 
 module.exports.registerWith = module.exports;
