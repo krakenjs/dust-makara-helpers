@@ -27,15 +27,14 @@ module.exports = function(dust, options) {
 
         var locale = localeFromContext(ctx);
 
-        var localeString = stringLocale(locale);
-        var cacheKey = bundle + '#' + localeString;
+        var cacheKey = bundle + '#' + locale;
         if (dust.config.cache && dust.cache[cacheKey]) {
             debug("found in cache at '%s'", cacheKey);
             return cb(null, dust.cache[cacheKey]);
         }
 
         debug("performing lookup for template '%s' and locale %j", ctx.templateName, locale);
-        ctx.options.view.lookup(bundle, locale, iferr(cb, function (file) {
+        ctx.options.view.lookup(bundle, { locale: locale }, iferr(cb, function (file) {
             fs.readFile(file, 'utf-8', iferr(cb, function (data) {
                 try {
                     var parsed = spud.parse(data);
@@ -60,8 +59,8 @@ module.exports = function(dust, options) {
     }
 
     function localeFromContext(ctx) {
-        return ctx.get('contextLocale') || ctx.get('contentLocality') ||
-            ctx.get('locale') || ctx.get('locality') || {};
+        return stringLocale(ctx.get('contextLocale') || ctx.get('contentLocality') ||
+            ctx.get('locale') || ctx.get('locality') || {});
     }
 
     // This is where the magic lies. To get a hook on templates and wrap them with
@@ -148,8 +147,11 @@ function makeErr(ctx, bundle) {
 }
 
 function stringLocale(locale) {
+    debug("normalizing locale %j", locale);
     if (!locale) {
         return undefined;
+    } else if (typeof locale === 'string') {
+        return locale;
     } else if (locale.country && locale.language) {
         return locale.language + '-' + locale.country;
     } else {

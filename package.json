@@ -25,6 +25,7 @@
     "verror": "^1.6.0"
   },
   "devDependencies": {
+    "bcp47": "^1.1.2",
     "dustjs-linkedin": "~2.7.1",
     "engine-munger": "^1.0.0-3",
     "freshy": "^1.0.0",
