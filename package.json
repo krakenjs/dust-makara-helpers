@@ -27,7 +27,7 @@
   "devDependencies": {
     "bcp47": "^1.1.2",
     "dustjs-linkedin": "~2.7.1",
-    "engine-munger": "^1.0.0-3",
+    "engine-munger": "^1.0.0-4",
     "freshy": "^1.0.0",
     "nyc": "^2.3.0",
     "tap": "^1.2.0"
