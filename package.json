@@ -19,7 +19,7 @@
     "bcp47-stringify": "^1.0.0",
     "debuglog": "^1.0.1",
     "dust-message-helper": "^4.0.2",
-    "dust-usecontent-helper": "^4.0.0-2",
+    "dust-usecontent-helper": "^4.0.0-3",
     "iferr": "^0.1.5",
     "spud": "^2.0.1",
     "verror": "^1.6.0"

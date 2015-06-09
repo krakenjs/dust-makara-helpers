@@ -24,7 +24,8 @@ module.exports = function(dust, options) {
     // class's lookup method. It must be the express 5 style one, asynchronous,
     // and for internationalized lookups to work, it must be the backport and
     // extension provided by engine-munger.
-    usecontent(function(ctx, bundle, cb) {
+
+    var loader = function(ctx, bundle, cb) {
         aproba('OSF', arguments);
 
         debug("content request for '%s'", bundle);
@@ -57,8 +58,9 @@ module.exports = function(dust, options) {
                 }
             }));
         }))
+    };
 
-    }).registerWith(dust);
+    usecontent.withLoader(loader).registerWith(dust);
 
     // The message helper is the main user surface from the template side.
     message.registerWith(dust, { enableMetadata: options.enableMetadata });
@@ -108,7 +110,14 @@ module.exports = function(dust, options) {
                             return chunk.setError(makeErr(ctx, bundle));
                         }
 
-                        dust.helpers.useContent(chunk, ctx, { block: tmpl }, { bundle: bundle }).end();
+                        loader(ctx, bundle, function (err, content) {
+                            if (err) {
+                                chunk.setError(err);
+                            } else {
+                                hackGibson(ctx, content, bundle);
+                            }
+                            dust.helpers.useContent(chunk, ctx, { block: tmpl }, { bundle: bundle }).end();
+                        });
                     });
                 };
                 newTmpl.templateName = tmpl.templateName;
@@ -177,4 +186,34 @@ function stringLocale(locale) {
     }
 }
 
+function hackGibson(ctx, content, bundle) {
+    var oldShiftBlocks = ctx.shiftBlocks;
+    var oldPush = ctx.push;
+    ctx.shiftBlocks = function(locals) {
+        return oldShiftBlocks.call(this, objMap(locals, function (l) {
+            return wrapBlock(l, content, bundle);
+        }));
+    };
+
+    ctx.push = function(head, idx, len) {
+        var newCtx = oldPush.apply(this, arguments);
+        hackGibson(newCtx, content, bundle);
+        return newCtx;
+    };
+}
+
+function wrapBlock(block, content, bundle) {
+    return function (chunk, ctx) {
+        ctx = ctx.push({intl: { messages: content, bundle: bundle }});
+        return block(chunk, ctx);
+    }
+}
+
+function objMap(obj, fn) {
+    var n = {};
+    Object.keys(obj).forEach(function (e) {
+        n[e] = fn(obj[e]);
+    });
+    return n;
+}
 module.exports.registerWith = module.exports;
