@@ -14,13 +14,21 @@ module.exports = function(dust, options) {
 
     debug("registering");
 
-    var autoloadTemplateContent = (options.autoloadTemplateContent == null ? true : options.autoloadTemplateContent);
+    // Default to true, but since it imposes some complexity and lack of clarity,
+    // about where things come from in the templates, allow it to be disabled.
+    var autoloadTemplateContent = options.autoloadTemplateContent == null || options.autoloadTemplateContent;
 
     debug("will autoload template content? %j", autoloadTemplateContent);
 
+    // We bind the loader for the useContent helper here to the express view
+    // class's lookup method. It must be the express 5 style one, asynchronous,
+    // and for internationalized lookups to work, it must be the backport and
+    // extension provided by engine-munger.
     usecontent(function(ctx, bundle, cb) {
-        debug("content request for '%s'", bundle);
         aproba('OSF', arguments);
+
+        debug("content request for '%s'", bundle);
+
         if (!ctx.options || !ctx.options.view) {
             return cb(makeErr(ctx, bundle));
         }
@@ -52,13 +60,18 @@ module.exports = function(dust, options) {
 
     }).registerWith(dust);
 
+    // The message helper is the main user surface from the template side.
     message.registerWith(dust, { enableMetadata: options.enableMetadata });
 
+    // Here's where the dirty bit of auto-wrapping templates with the content
+    // load is triggered.
     if (autoloadTemplateContent) {
         wrapOnLoad(dust);
     }
 
     function localeFromContext(ctx) {
+        // Handle all the backward compatibility names (*Locality) and the new
+        // ones, too.
         return stringLocale(ctx.get('contextLocale') || ctx.get('contentLocality') ||
             ctx.get('locale') || ctx.get('locality') || {});
     }
@@ -102,6 +115,8 @@ module.exports = function(dust, options) {
                 newTmpl.__dustBody = true;
 
                 if (dust.config.cache) {
+                    // This actually replaces the template registered by
+                    // compiling and loading above.
                     dust.cache[tmpl.templateName] = newTmpl;
                 }
 
@@ -119,11 +134,14 @@ module.exports = function(dust, options) {
 
     /**
      * Extracts a template function (body_0) from whatever is passed.
-     * @param nameOrTemplate {*} Could be:
+     *
+     * This is an extract of the same function from the dustjs source.
+     *
+     *  nameOrTemplate Could be:
      *   - the name of a template to load from cache
      *   - a CommonJS-compiled template (a function with a `template` property)
      *   - a template function
-     * @return {Function} a template function, if found
+     * returns a template function, if found
      */
     function getTemplate(nameOrTemplate) {
         if(!nameOrTemplate) {
