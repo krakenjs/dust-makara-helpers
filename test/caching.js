@@ -35,7 +35,7 @@ function newDust() {
     return dust;
 }
 
-test('Check  that cache is loaded', function (t) {
+test('Check that cache is loaded', function (t) {
     var dust = newDust();
 
     makarahelpers.registerWith(dust);
@@ -44,7 +44,12 @@ test('Check  that cache is loaded', function (t) {
         t.error(err);
         t.ok(dust.cache['simple.properties#en-US']);
         t.equal(out, 'Hello');
-        t.end();
+        render(dust, 'simple', { locale: { country: 'US', language: 'en' } }, function (err, out) {
+            t.error(err);
+            t.ok(dust.cache['simple.properties#en-US']);
+            t.equal(out, 'Hello');
+            t.end();
+        });
     });
 });
 

@@ -19,6 +19,7 @@ module.exports = function(dust, options) {
     debug("will autoload template content? %j", autoloadTemplateContent);
 
     usecontent(function(ctx, bundle, cb) {
+        debug("content request for '%s'", bundle);
         aproba('OSF', arguments);
         if (!ctx.options || !ctx.options.view) {
             return cb(makeErr(ctx, bundle));
@@ -33,7 +34,7 @@ module.exports = function(dust, options) {
             return cb(null, dust.cache[cacheKey]);
         }
 
-        debug("looking up '%s' for template '%s' and locale %j", bundle, ctx.templateName, locale);
+        debug("performing lookup for template '%s' and locale %j", ctx.templateName, locale);
         ctx.options.view.lookup(bundle, locale, iferr(cb, function (file) {
             fs.readFile(file, 'utf-8', iferr(cb, function (data) {
                 try {
@@ -95,12 +96,15 @@ module.exports = function(dust, options) {
                             return chunk.setError(makeErr(ctx, bundle));
                         }
 
-                        debug("looking up '%s' for template '%s', and locale %j", bundle, tmpl.templateName, locale);
                         dust.helpers.useContent(chunk, ctx, { block: tmpl }, { bundle: bundle }).end();
                     });
                 };
                 newTmpl.templateName = tmpl.templateName;
                 newTmpl.__dustBody = true;
+
+                if (dust.config.cache) {
+                    dust.cache[tmpl.templateName] = newTmpl;
+                }
 
                 cb(null, newTmpl);
             });
