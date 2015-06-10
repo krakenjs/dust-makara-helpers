@@ -106,10 +106,6 @@ module.exports = function(dust, options) {
                         var locale = localeFromContext(ctx);
                         var bundle = tmpl.templateName + '.properties';
 
-                        if (!ctx.options || !ctx.options.view) {
-                            return chunk.setError(makeErr(ctx, bundle));
-                        }
-
                         loader(ctx, bundle, function (err, content) {
                             if (err) {
                                 chunk.setError(err);
