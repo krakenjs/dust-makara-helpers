@@ -115,8 +115,8 @@ module.exports = function(dust, options) {
                                 chunk.setError(err);
                             } else {
                                 hackGibson(ctx, content, bundle);
+                                dust.helpers.useContent(chunk, ctx, { block: tmpl }, { bundle: bundle }).end();
                             }
-                            dust.helpers.useContent(chunk, ctx, { block: tmpl }, { bundle: bundle }).end();
                         });
                     });
                 };
