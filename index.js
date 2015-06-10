@@ -189,12 +189,18 @@ function stringLocale(locale) {
 function hackGibson(ctx, content, bundle) {
     var oldShiftBlocks = ctx.shiftBlocks;
     var oldPush = ctx.push;
+
+    // Alter the context to wrap each block shifted, so content will be
+    // present even in blocks rendered from other templates like layouts.
     ctx.shiftBlocks = function(locals) {
         return oldShiftBlocks.call(this, objMap(locals, function (l) {
             return wrapBlock(l, content, bundle);
         }));
     };
 
+    // Alter the context to apply this same alteration to each context
+    // pushed below this one, maintaining this hack for all future
+    // context pushes.
     ctx.push = function(head, idx, len) {
         var newCtx = oldPush.apply(this, arguments);
         hackGibson(newCtx, content, bundle);
@@ -203,6 +209,11 @@ function hackGibson(ctx, content, bundle) {
 }
 
 function wrapBlock(block, content, bundle) {
+    // Return a block that re-pushes the content, and then passes to
+    // the original block. This makes sure the content is associated
+    // with the auto-loaded content bundle, not coming from the calling
+    // context, which could be a different template and have the wrong
+    // content loaded.
     return function (chunk, ctx) {
         ctx = ctx.push({intl: { messages: content, bundle: bundle }});
         return block(chunk, ctx);
@@ -216,4 +227,5 @@ function objMap(obj, fn) {
     });
     return n;
 }
+
 module.exports.registerWith = module.exports;
