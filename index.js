@@ -100,24 +100,29 @@ module.exports = function(dust, options) {
                     tmpl = dust.loadSource(dust.compile(srcOrTemplate, name));
                 }
 
-                debug("wrapping template '%s' to look up default content", tmpl.templateName);
-                var newTmpl = function (chunk, ctx) {
-                    return chunk.map(function (chunk) {
-                        var locale = localeFromContext(ctx);
-                        var bundle = tmpl.templateName + '.properties';
+                if (tmpl.loadsDefaultContent) {
+                    newTmpl = tmpl;
+                } else {
+                    debug("wrapping template '%s' to look up default content", tmpl.templateName);
+                    var newTmpl = function (chunk, ctx) {
+                        return chunk.map(function (chunk) {
+                            var locale = localeFromContext(ctx);
+                            var bundle = tmpl.templateName + '.properties';
 
-                        loader(ctx, bundle, function (err, content) {
-                            if (err) {
-                                chunk.setError(err);
-                            } else {
-                                hackGibson(ctx, content, bundle);
-                                dust.helpers.useContent(chunk, ctx, { block: tmpl }, { bundle: bundle }).end();
-                            }
+                            loader(ctx, bundle, function (err, content) {
+                                if (err) {
+                                    chunk.setError(err);
+                                } else {
+                                    hackGibson(ctx, content, bundle);
+                                    dust.helpers.useContent(chunk, ctx, { block: tmpl }, { bundle: bundle }).end();
+                                }
+                            });
                         });
-                    });
-                };
-                newTmpl.templateName = tmpl.templateName;
-                newTmpl.__dustBody = true;
+                    };
+                    newTmpl.templateName = tmpl.templateName;
+                    newTmpl.loadsDefaultContent = true;
+                    newTmpl.__dustBody = true;
+                }
 
                 if (dust.config.cache) {
                     // This actually replaces the template registered by
