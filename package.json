@@ -19,7 +19,7 @@
     "bcp47-stringify": "^1.0.0",
     "debuglog": "^1.0.1",
     "dust-message-helper": "^4.0.2",
-    "dust-usecontent-helper": "^4.0.0-3",
+    "dust-usecontent-helper": "^4.0.0",
     "iferr": "^0.1.5",
     "spud": "^2.0.1",
     "verror": "^1.6.0"
@@ -27,7 +27,7 @@
   "devDependencies": {
     "bcp47": "^1.1.2",
     "dustjs-linkedin": "~2.7.1",
-    "engine-munger": "^1.0.0-4",
+    "engine-munger": "^1.0.0",
     "freshy": "^1.0.0",
     "nyc": "^2.3.0",
     "tap": "^1.2.0"
