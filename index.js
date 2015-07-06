@@ -74,7 +74,7 @@ module.exports = function(dust, options) {
     function localeFromContext(ctx) {
         // Handle all the backward compatibility names (*Locality) and the new
         // ones, too.
-        return stringLocale(ctx.get('contextLocale') || ctx.get('contentLocality') ||
+        return stringLocale(ctx.get('contentLocale') || ctx.get('contentLocality') ||
             ctx.get('locale') || ctx.get('locality') || {});
     }
 
