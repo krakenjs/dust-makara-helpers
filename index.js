@@ -57,7 +57,7 @@ module.exports = function(dust, options) {
                     cb(e);
                 }
             }));
-        }))
+        }));
     };
 
     usecontent.withLoader(loader).registerWith(dust);
@@ -106,7 +106,6 @@ module.exports = function(dust, options) {
                     debug("wrapping template '%s' to look up default content", tmpl.templateName);
                     var newTmpl = function (chunk, ctx) {
                         return chunk.map(function (chunk) {
-                            var locale = localeFromContext(ctx);
                             var bundle = tmpl.templateName + '.properties';
 
                             loader(ctx, bundle, function (err, content) {
@@ -134,7 +133,7 @@ module.exports = function(dust, options) {
             });
 
             debug("calling old onLoad to get template '%s'", name);
-            if (oldOnLoad.length == 2) {
+            if (oldOnLoad.length === 2) {
                 return oldOnLoad.call(this, name, ourLoader);
             } else {
                 return oldOnLoad.call(this, name, options, ourLoader);
@@ -155,7 +154,7 @@ module.exports = function(dust, options) {
      */
     function getTemplate(nameOrTemplate) {
         if(!nameOrTemplate) {
-            return;
+            return null;
         }
         if(typeof nameOrTemplate === 'function' && nameOrTemplate.template) {
             // Sugar away CommonJS module templates
@@ -202,7 +201,7 @@ function hackGibson(ctx, content, bundle) {
     // Alter the context to apply this same alteration to each context
     // pushed below this one, maintaining this hack for all future
     // context pushes.
-    ctx.push = function(head, idx, len) {
+    ctx.push = function(/* head, idx, len */) {
         var newCtx = oldPush.apply(this, arguments);
         hackGibson(newCtx, content, bundle);
         return newCtx;
@@ -218,7 +217,7 @@ function wrapBlock(block, content, bundle) {
     return function (chunk, ctx) {
         ctx = ctx.push({intl: { messages: content, bundle: bundle }});
         return block(chunk, ctx);
-    }
+    };
 }
 
 function objMap(obj, fn) {
