@@ -3,3 +3,5 @@ node_modules
 *.swp
 .nyc_output
 coverage
+
+browser.*.js

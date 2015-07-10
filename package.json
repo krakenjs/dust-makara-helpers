@@ -5,12 +5,17 @@
   "main": "index.js",
   "scripts": {
     "test": "nyc tap test/*.js && nyc report",
+    "prepublish": "webpack browser.js browser.amd.js --output-library-target=amd --library=dust-usecontent-helper && webpack browser.js browser.umd.js --output-library-target=umd && webpack browser.js browser.browser.js --output-library-target=var --library=dustUsecontentHelper",
     "coverage": "nyc report --reporter=lcov"
   },
   "keywords": [
+    "browser",
     "i18n",
     "dust"
   ],
+  "browserPackage": {
+      "main": "browser.js"
+  },
   "author": "Aria Stewart <ariastewart@paypal.com>",
   "license": "Apache-2.0",
   "repository": "https://github.com/krakenjs/dust-makara-helpers.git",
@@ -29,7 +34,9 @@
     "dustjs-linkedin": "~2.7.1",
     "engine-munger": "^1.0.0",
     "freshy": "^1.0.0",
+    "node-libs-browser": "^0.5.2",
     "nyc": "^2.3.0",
-    "tap": "^1.2.0"
+    "tap": "^1.2.0",
+    "webpack": "^1.10.1"
   }
 }
