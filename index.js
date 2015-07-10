@@ -71,13 +71,6 @@ module.exports = function(dust, options) {
         wrapOnLoad(dust);
     }
 
-    function localeFromContext(ctx) {
-        // Handle all the backward compatibility names (*Locality) and the new
-        // ones, too.
-        return stringLocale(ctx.get('contentLocale') || ctx.get('contentLocality') ||
-            ctx.get('locale') || ctx.get('locality') || {});
-    }
-
     // This is where the magic lies. To get a hook on templates and wrap them with
     // javascript that is aware of the template's name
     function wrapOnLoad(dust) {
@@ -227,5 +220,13 @@ function objMap(obj, fn) {
     });
     return n;
 }
+
+function localeFromContext(ctx) {
+    // Handle all the backward compatibility names (*Locality) and the new
+    // ones, too.
+    return stringLocale(ctx.get('contentLocale') || ctx.get('contentLocality') ||
+        ctx.get('locale') || ctx.get('locality') || {});
+}
+
 
 module.exports.registerWith = module.exports;
