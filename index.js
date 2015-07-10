@@ -68,96 +68,10 @@ module.exports = function(dust, options) {
     // Here's where the dirty bit of auto-wrapping templates with the content
     // load is triggered.
     if (autoloadTemplateContent) {
-        wrapOnLoad(dust);
+        wrapOnLoad(dust, loader);
     }
 
-    // This is where the magic lies. To get a hook on templates and wrap them with
-    // javascript that is aware of the template's name
-    function wrapOnLoad(dust) {
-        var oldOnLoad = dust.onLoad;
 
-        if (!oldOnLoad) {
-            throw new Error("dust.onLoad must be configured to use automatic content loading");
-        }
-
-        debug("wrapping onLoad function to support content autoloading");
-
-        dust.onLoad = function(name, options, cb) {
-
-            var ourLoader = iferr(cb, function (srcOrTemplate) {
-                debug("got template %s", srcOrTemplate);
-
-                var tmpl = getTemplate(srcOrTemplate);
-                if (!tmpl) {
-                    debug("Compiling template '%s'", name);
-                    tmpl = dust.loadSource(dust.compile(srcOrTemplate, name));
-                }
-
-                if (tmpl.loadsDefaultContent) {
-                    newTmpl = tmpl;
-                } else {
-                    debug("wrapping template '%s' to look up default content", tmpl.templateName);
-                    var newTmpl = function (chunk, ctx) {
-                        return chunk.map(function (chunk) {
-                            var bundle = tmpl.templateName + '.properties';
-
-                            loader(ctx, bundle, function (err, content) {
-                                if (err) {
-                                    chunk.setError(err);
-                                } else {
-                                    hackGibson(ctx, content, bundle);
-                                    dust.helpers.useContent(chunk, ctx, { block: tmpl }, { bundle: bundle }).end();
-                                }
-                            });
-                        });
-                    };
-                    newTmpl.templateName = tmpl.templateName;
-                    newTmpl.loadsDefaultContent = true;
-                    newTmpl.__dustBody = true;
-                }
-
-                if (dust.config.cache) {
-                    // This actually replaces the template registered by
-                    // compiling and loading above.
-                    dust.cache[tmpl.templateName] = newTmpl;
-                }
-
-                cb(null, newTmpl);
-            });
-
-            debug("calling old onLoad to get template '%s'", name);
-            if (oldOnLoad.length === 2) {
-                return oldOnLoad.call(this, name, ourLoader);
-            } else {
-                return oldOnLoad.call(this, name, options, ourLoader);
-            }
-        };
-    }
-
-    /**
-     * Extracts a template function (body_0) from whatever is passed.
-     *
-     * This is an extract of the same function from the dustjs source.
-     *
-     *  nameOrTemplate Could be:
-     *   - the name of a template to load from cache
-     *   - a CommonJS-compiled template (a function with a `template` property)
-     *   - a template function
-     * returns a template function, if found
-     */
-    function getTemplate(nameOrTemplate) {
-        if(!nameOrTemplate) {
-            return null;
-        }
-        if(typeof nameOrTemplate === 'function' && nameOrTemplate.template) {
-            // Sugar away CommonJS module templates
-            return nameOrTemplate.template;
-        }
-        if(dust.isTemplateFn(nameOrTemplate)) {
-            // Template functions passed directly
-            return nameOrTemplate;
-        }
-    }
 };
 
 function makeErr(ctx, bundle) {
@@ -228,5 +142,92 @@ function localeFromContext(ctx) {
         ctx.get('locale') || ctx.get('locality') || {});
 }
 
+// This is where the magic lies. To get a hook on templates and wrap them with
+// javascript that is aware of the template's name
+function wrapOnLoad(dust, loader) {
+    var oldOnLoad = dust.onLoad;
+
+    if (!oldOnLoad) {
+        throw new Error("dust.onLoad must be configured to use automatic content loading");
+    }
+
+    debug("wrapping onLoad function to support content autoloading");
+
+    dust.onLoad = function(name, options, cb) {
+
+        var ourLoader = iferr(cb, function (srcOrTemplate) {
+            debug("got template %s", srcOrTemplate);
+
+            var tmpl = getTemplate(srcOrTemplate);
+            if (!tmpl) {
+                debug("Compiling template '%s'", name);
+                tmpl = dust.loadSource(dust.compile(srcOrTemplate, name));
+            }
+
+            if (tmpl.loadsDefaultContent) {
+                newTmpl = tmpl;
+            } else {
+                debug("wrapping template '%s' to look up default content", tmpl.templateName);
+                var newTmpl = function (chunk, ctx) {
+                    return chunk.map(function (chunk) {
+                        var bundle = tmpl.templateName + '.properties';
+
+                        loader(ctx, bundle, function (err, content) {
+                            if (err) {
+                                chunk.setError(err);
+                            } else {
+                                hackGibson(ctx, content, bundle);
+                                dust.helpers.useContent(chunk, ctx, { block: tmpl }, { bundle: bundle }).end();
+                            }
+                        });
+                    });
+                };
+                newTmpl.templateName = tmpl.templateName;
+                newTmpl.loadsDefaultContent = true;
+                newTmpl.__dustBody = true;
+            }
+
+            if (dust.config.cache) {
+                // This actually replaces the template registered by
+                // compiling and loading above.
+                dust.cache[tmpl.templateName] = newTmpl;
+            }
+
+            cb(null, newTmpl);
+        });
+
+        debug("calling old onLoad to get template '%s'", name);
+        if (oldOnLoad.length === 2) {
+            return oldOnLoad.call(this, name, ourLoader);
+        } else {
+            return oldOnLoad.call(this, name, options, ourLoader);
+        }
+    };
+
+    /**
+     * Extracts a template function (body_0) from whatever is passed.
+     *
+     * This is an extract of the same function from the dustjs source.
+     *
+     *  nameOrTemplate Could be:
+     *   - the name of a template to load from cache
+     *   - a CommonJS-compiled template (a function with a `template` property)
+     *   - a template function
+     * returns a template function, if found
+     */
+    function getTemplate(nameOrTemplate) {
+        if(!nameOrTemplate) {
+            return null;
+        }
+        if(typeof nameOrTemplate === 'function' && nameOrTemplate.template) {
+            // Sugar away CommonJS module templates
+            return nameOrTemplate.template;
+        }
+        if(dust.isTemplateFn(nameOrTemplate)) {
+            // Template functions passed directly
+            return nameOrTemplate;
+        }
+    }
+}
 
 module.exports.registerWith = module.exports;
