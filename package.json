@@ -1,6 +1,6 @@
 {
   "name": "dust-makara-helpers",
-  "version": "4.0.1",
+  "version": "4.1.0",
   "description": "Internationalization helpers for dust",
   "main": "index.js",
   "scripts": {
@@ -14,7 +14,7 @@
     "dust"
   ],
   "browserPackage": {
-      "main": "browser.js"
+    "main": "browser.js"
   },
   "author": "Aria Stewart <ariastewart@paypal.com>",
   "license": "Apache-2.0",
