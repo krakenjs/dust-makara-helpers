@@ -5,7 +5,9 @@ Makes it easy to set up the complementary dust `@useContent` and `@message` help
 
 The content lookups are stored in the dust cache if it is enabled.
 
-This module is for server-side use only. `@useContent` and `@message` can be used in the browser, but will need to be configured with other ways to load content.
+This module requires the full build of dust, with the compiler, since the `@message` helper compiles strings with dust.
+
+`@useContent` and `@message` can be used in the browser, but will need to be configured with other ways to load content, such as using requirejs.
 
 Use
 ----
