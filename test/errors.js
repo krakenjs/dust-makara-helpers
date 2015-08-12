@@ -4,6 +4,24 @@ var test = require('tap').test;
 var path = require('path');
 var fs = require('fs');
 var freshy = require('freshy').freshy;
+var makeViewClass = require('engine-munger');
+var View = makeViewClass({
+    properties: {
+        root: path.resolve(__dirname, 'fixtures'),
+        i18n: {
+            fallback: 'en-US',
+            formatPath: function (locale) {
+                return path.join(locale.langtag.region, locale.langtag.language.language);
+            }
+        }
+    }
+});
+
+function render(dust, name, context, cb) {
+    var ctx = dust.context(context, { view: new View(name + '.dust', { engines: { ".dust": function() {} } }) });
+    ctx.templateName = name;
+    dust.render(name, ctx, cb);
+}
 
 function newDust() {
     var dust = freshy('dustjs-linkedin');
@@ -41,4 +59,16 @@ test('Make sure a view instance is passed', function (t) {
         t.notOk(out);
         t.end();
     });
+});
+
+test('Cannot render view template without matching autoload bundle', function(t){
+        var dust = newDust();
+
+        makarahelpers.registerWith(dust);
+
+        render(dust, 'without-content', { locale: { country: 'US', language: 'en' } }, function (err, out) {
+            t.match(err, {message: "missing bundle named 'without-content.properties' for template 'without-content'"});
+            t.notOk(out);
+            t.end();
+        });
 });
