@@ -33,8 +33,23 @@ module.exports = function(dust, options) {
             return cb(null, dust.cache[cacheKey]);
         }
 
+        // Default to true to preserve prior behavior
+        var requireTemplateContent = options.requireTemplateContent == null || options.requireTemplateContent;
+
+        var lookupErrCb = function(err){
+            console.log(err.message);
+            if(!requireTemplateContent && ~err.message.indexOf('Failed to lookup view')){
+                if(dust.config.cache){
+                    dust.cache[cacheKey] = {};
+                }
+                cb(null, {});
+            } else {
+                cb(makeLookupErr(ctx, bundle));
+            }
+        };
+
         debug("performing lookup for template '%s' and locale %j", ctx.templateName, locale);
-        ctx.options.view.lookup(bundle, { locale: locale }, iferr(cb, function (file) {
+        ctx.options.view.lookup(bundle, { locale: locale }, iferr(lookupErrCb, function (file) {
             fs.readFile(file, 'utf-8', iferr(cb, function (data) {
                 try {
                     var parsed = spud.parse(data);
@@ -55,6 +70,12 @@ module.exports = function(dust, options) {
 
 
 };
+
+function makeLookupErr(ctx, bundle){
+    var str = "missing bundle named '%s' for template '%s'";
+    debug(str, bundle, ctx.templateName);
+    return new VError(str, bundle, ctx.templateName);
+}
 
 function makeErr(ctx, bundle) {
     var str = "no view available rendering template named '%s' and content bundle '%s'";

@@ -16,7 +16,8 @@ Use
 var dust = require('dustjs-linkedin');
 require('dust-makara-helpers').registerWith(dust, {
     enableMetadata: true,
-    autoloadTemplateContent: false
+    autoloadTemplateContent: false,
+    requireTemplateContent: false
 });
 ```
 
@@ -25,5 +26,7 @@ Options
 
 * `enableMetadata`: defaults to `false`. Turns on support for `<edit>` metadata tags in [dust-message-helper] to support in-place content editing.
 * `autoloadTemplateContent`: defaults to `true`. Allows you to disable automatic loading of content per template, allowing you to have a completely disjoint mapping between templates and content bundles, rather than a 1:1 mapping of template name to content bundle filename.
+* `requireTemplateContent`: defaults to `true`. Allows you to disable the requirement
+that each template have its corresponding `.proerties` file by name.
 
 [dust-message-helper]: https://github.com/krakenjs/dust-message-helper
