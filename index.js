@@ -35,6 +35,7 @@ module.exports = function(dust, options) {
 
         debug("performing lookup for template '%s' and locale %j", ctx.templateName, locale);
         ctx.options.view.lookup(bundle, { locale: locale }, iferr(cb, function (file) {
+            debug("lookup for template '%s' and locale %j gave %j", ctx.templateName, locale, file);
             fs.readFile(file, 'utf-8', iferr(cb, function (data) {
                 try {
                     var parsed = spud.parse(data);
