@@ -6,12 +6,11 @@ var debug = require('debuglog')('dust-makara-helpers');
 var fs = require('fs');
 var aproba = require('aproba');
 var bcp47s = require('bcp47-stringify');
-
 var common = require('./common');
-
+var localeOp;
 module.exports = function(dust, options) {
     options = options || {};
-
+    localeOp = (options.useLocaleObject) ? localeNoop : stringLocale;
     // We bind the loader for the useContent helper here to the express view
     // class's lookup method. It must be the express 5 style one, asynchronous,
     // and for internationalized lookups to work, it must be the backport and
@@ -76,10 +75,13 @@ function stringLocale(locale) {
     }
 }
 
+function localeNoop(locale) {
+    return locale;   
+}
 function localeFromContext(ctx) {
     // Handle all the backward compatibility names (*Locality) and the new
     // ones, too.
-    return stringLocale(ctx.get('contentLocale') || ctx.get('contentLocality') ||
+    return localeOp(ctx.get('contentLocale') || ctx.get('contentLocality') ||
         ctx.get('locale') || ctx.get('locality') || {});
 }
 
