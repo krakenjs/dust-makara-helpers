@@ -16,7 +16,7 @@ Use
 var dust = require('dustjs-linkedin');
 require('dust-makara-helpers').registerWith(dust, {
     enableMetadata: true,
-    autoloadTemplateContent: false
+    autoloadTemplateContent: false,
     localeFromContext: function (ctx) {
       var locale;
       //anything special you want to do
