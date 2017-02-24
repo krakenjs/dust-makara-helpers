@@ -12,7 +12,7 @@ This module requires the full build of dust, with the compiler, since the `@mess
 Use
 ----
 
-```
+```js
 var dust = require('dustjs-linkedin');
 require('dust-makara-helpers').registerWith(dust, {
     enableMetadata: true,
