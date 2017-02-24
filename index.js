@@ -25,7 +25,7 @@ module.exports = function(dust, options) {
             return cb(makeErr(ctx, bundle));
         }
 
-        var locale = localeFromContext(ctx);
+        var locale = options.localeFromContext && options.localeFromContext(ctx) || localeFromContext(ctx);
 
         var cacheKey = bundle + '#' + locale;
         if (dust.config.cache && dust.cache[cacheKey]) {
