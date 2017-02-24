@@ -6,12 +6,13 @@ var debug = require('debuglog')('dust-makara-helpers');
 var fs = require('fs');
 var aproba = require('aproba');
 var bcp47s = require('bcp47-stringify');
-
 var common = require('./common');
-
+var localeContexts = ['contentLocale', 'contentLocality', 'locale', 'locality']
+var localeTransform;
 module.exports = function(dust, options) {
     options = options || {};
-
+    localeTransform = (options.useLocaleObject !== undefined && options.useLocaleObject === false) ? localeNoTransform : localeToString;
+    localeContexts = options.localeContexts || localeContexts;
     // We bind the loader for the useContent helper here to the express view
     // class's lookup method. It must be the express 5 style one, asynchronous,
     // and for internationalized lookups to work, it must be the backport and
@@ -63,7 +64,7 @@ function makeErr(ctx, bundle) {
     return new VError(str, ctx.templateName, bundle);
 }
 
-function stringLocale(locale) {
+function localeToString(locale) {
     debug("normalizing locale %j", locale);
     if (!locale) {
         return undefined;
@@ -76,11 +77,17 @@ function stringLocale(locale) {
     }
 }
 
+function localeNoTransform(locale) {
+    return locale;   
+}
 function localeFromContext(ctx) {
-    // Handle all the backward compatibility names (*Locality) and the new
-    // ones, too.
-    return stringLocale(ctx.get('contentLocale') || ctx.get('contentLocality') ||
-        ctx.get('locale') || ctx.get('locality') || {});
+    var locale;
+    localeContexts.some(function (key) {
+        locale = ctx.get(key);
+        debug("performing lookup for locale in context key '%s'. Found %j", key, locale);
+        return locale !== undefined;
+    });
+    return localeTransform(locale || {});
 }
 
 module.exports.registerWith = module.exports;
