@@ -11,7 +11,7 @@ var localeContexts = ['contentLocale', 'contentLocality', 'locale', 'locality']
 var localeTransform;
 module.exports = function(dust, options) {
     options = options || {};
-    localeTransform = (options.useLocaleObject) ? localeNoTransform : localeToString;
+    localeTransform = (options.useLocaleObject !== undefined && options.useLocaleObject === false) ? localeNoTransform : localeToString;
     localeContexts = options.localeContexts || localeContexts;
     // We bind the loader for the useContent helper here to the express view
     // class's lookup method. It must be the express 5 style one, asynchronous,
