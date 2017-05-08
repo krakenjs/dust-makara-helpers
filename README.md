@@ -30,6 +30,6 @@ Options
 
 * `enableMetadata`: defaults to `false`. Turns on support for `<edit>` metadata tags in [dust-message-helper] to support in-place content editing.
 * `autoloadTemplateContent`: defaults to `true`. Allows you to disable automatic loading of content per template, allowing you to have a completely disjoint mapping between templates and content bundles, rather than a 1:1 mapping of template name to content bundle filename.
-* `localeFromContext`: Function. takes context as a parameter. Return a bcp47-style object or a locale string like `en-US`
+* `localeFromContext`: Function. takes context as a parameter. Return a bcp47-style object or a locale string like `en-US`. Please see `localeFromContext` in this module's index.js file to see what you would be overriding.
 
 [dust-message-helper]: https://github.com/krakenjs/dust-message-helper
