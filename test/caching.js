@@ -41,12 +41,13 @@ test('Check that cache is loaded', function (t) {
     makarahelpers.registerWith(dust);
 
     render(dust, 'simple', { locale: { country: 'US', language: 'en' } }, function (err, out) {
+        var cacheKey = `simple.properties#${JSON.stringify('en-US')}`;
         t.error(err);
-        t.ok(dust.cache['simple.properties#en-US']);
+        t.ok(dust.cache[cacheKey]);
         t.equal(out, 'Hello');
         render(dust, 'simple', { locale: { country: 'US', language: 'en' } }, function (err, out) {
             t.error(err);
-            t.ok(dust.cache['simple.properties#en-US']);
+            t.ok(dust.cache[cacheKey]);
             t.equal(out, 'Hello');
             t.end();
         });

@@ -25,9 +25,10 @@ module.exports = function(dust, options) {
             return cb(makeErr(ctx, bundle));
         }
 
-        var locale = localeFromContext(ctx);
-
-        var cacheKey = bundle + '#' + locale;
+        var locale = options.localeFromContext && options.localeFromContext(ctx) || localeFromContext(ctx);
+        
+        //stringify the locale in case a custom localeFromContext method returns a bcp47-style JSON object
+        var cacheKey = bundle + '#' + JSON.stringify(locale);
         if (dust.config.cache && dust.cache[cacheKey]) {
             debug("found in cache at '%s'", cacheKey);
             return cb(null, dust.cache[cacheKey]);
